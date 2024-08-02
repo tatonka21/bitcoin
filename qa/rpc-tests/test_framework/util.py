@@ -16,7 +16,6 @@ from base64 import b64encode
 from decimal import Decimal, ROUND_DOWN
 import json
 import http.client
-import random
 import shutil
 import subprocess
 import time
@@ -25,6 +24,7 @@ import errno
 
 from . import coverage
 from .authproxy import AuthServiceProxy, JSONRPCException
+import secrets
 
 COVERAGE_DIR = None
 
@@ -402,7 +402,7 @@ def gather_inputs(from_node, amount_needed, confirmations_required=1):
     """
     assert(confirmations_required >=0)
     utxo = from_node.listunspent(confirmations_required)
-    random.shuffle(utxo)
+    secrets.SystemRandom().shuffle(utxo)
     inputs = []
     total_in = Decimal("0.00000000")
     while total_in < amount_needed and len(utxo) > 0:
@@ -465,9 +465,9 @@ def random_zeropri_transaction(nodes, amount, min_fee, fee_increment, fee_varian
     Create a random zero-priority transaction.
     Returns (txid, hex-encoded-transaction-data, fee)
     """
-    from_node = random.choice(nodes)
-    to_node = random.choice(nodes)
-    fee = min_fee + fee_increment*random.randint(0,fee_variants)
+    from_node = secrets.choice(nodes)
+    to_node = secrets.choice(nodes)
+    fee = min_fee + fee_increment*secrets.SystemRandom().randint(0,fee_variants)
     (txid, txhex) = send_zeropri_transaction(from_node, to_node, amount, fee)
     return (txid, txhex, fee)
 
@@ -476,9 +476,9 @@ def random_transaction(nodes, amount, min_fee, fee_increment, fee_variants):
     Create a random transaction.
     Returns (txid, hex-encoded-transaction-data, fee)
     """
-    from_node = random.choice(nodes)
-    to_node = random.choice(nodes)
-    fee = min_fee + fee_increment*random.randint(0,fee_variants)
+    from_node = secrets.choice(nodes)
+    to_node = secrets.choice(nodes)
+    fee = min_fee + fee_increment*secrets.SystemRandom().randint(0,fee_variants)
 
     (total_in, inputs) = gather_inputs(from_node, amount+fee)
     outputs = make_change(from_node, total_in, amount, fee)

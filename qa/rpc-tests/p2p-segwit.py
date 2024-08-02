@@ -10,8 +10,8 @@ from test_framework.script import *
 from test_framework.blocktools import create_block, create_coinbase, add_witness_commitment, WITNESS_COMMITMENT_HEADER
 from test_framework.key import CECKey, CPubKey
 import time
-import random
 from binascii import hexlify
+import secrets
 
 # The versionbit bit used to signal activation of SegWit
 VB_WITNESS_BIT = 1
@@ -1037,7 +1037,7 @@ class SegWitTest(BitcoinTestFramework):
             # Pick 10 random blocks on main chain, and verify that getdata's
             # for MSG_BLOCK, MSG_WITNESS_BLOCK, and rpc getblock() are equal.
             all_heights = list(range(chain_height+1))
-            random.shuffle(all_heights)
+            secrets.SystemRandom().shuffle(all_heights)
             all_heights = all_heights[0:10]
             for height in all_heights:
                 block_hash = self.nodes[0].getblockhash(height)
@@ -1370,10 +1370,10 @@ class SegWitTest(BitcoinTestFramework):
         used_sighash_single_out_of_bounds = False
         for i in range(NUM_TESTS):
             # Choose random number of inputs to use.
-            num_inputs = random.randint(1, 10)
+            num_inputs = secrets.SystemRandom().randint(1, 10)
             # Create a slight bias for producing more utxos
-            num_outputs = random.randint(1, 11)
-            random.shuffle(temp_utxos)
+            num_outputs = secrets.SystemRandom().randint(1, 11)
+            secrets.SystemRandom().shuffle(temp_utxos)
             assert(len(temp_utxos) > num_inputs)
             tx = CTransaction()
             total_value = 0
@@ -1387,9 +1387,9 @@ class SegWitTest(BitcoinTestFramework):
             for i in range(num_inputs):
                 # Now try to sign each input, using a random hashtype.
                 anyonecanpay = 0
-                if random.randint(0, 1):
+                if secrets.SystemRandom().randint(0, 1):
                     anyonecanpay = SIGHASH_ANYONECANPAY
-                hashtype = random.randint(1, 3) | anyonecanpay
+                hashtype = secrets.SystemRandom().randint(1, 3) | anyonecanpay
                 sign_P2PK_witness_input(witness_program, tx, i, hashtype, temp_utxos[i].nValue, key)
                 if (hashtype == SIGHASH_SINGLE and i >= num_outputs):
                     used_sighash_single_out_of_bounds = True
