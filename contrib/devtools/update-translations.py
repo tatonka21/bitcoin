@@ -22,6 +22,7 @@ import sys
 import os
 import io
 import xml.etree.ElementTree as ET
+import defusedxml.ElementTree
 
 # Name of transifex tool
 TX = 'tx'
@@ -129,12 +130,12 @@ def postprocess_translations(reduce_diff_hacks=False):
     have_errors = False
     for (filename,filepath) in all_ts_files('.orig'):
         # pre-fixups to cope with transifex output
-        parser = ET.XMLParser(encoding='utf-8') # need to override encoding because 'utf8' is not understood only 'utf-8'
+        parser = defusedxml.ElementTree.XMLParser(encoding='utf-8') # need to override encoding because 'utf8' is not understood only 'utf-8'
         with open(filepath + '.orig', 'rb') as f:
             data = f.read()
         # remove control characters; this must be done over the entire file otherwise the XML parser will fail
         data = remove_invalid_characters(data)
-        tree = ET.parse(io.BytesIO(data), parser=parser)
+        tree = defusedxml.ElementTree.parse(io.BytesIO(data), parser=parser)
 
         # iterate over all messages in file
         root = tree.getroot()
