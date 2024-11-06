@@ -12,6 +12,7 @@ from test_framework.util import *
 from test_framework.script import *
 from test_framework.mininode import *
 from test_framework.blocktools import *
+import secrets
 
 SEQUENCE_LOCKTIME_DISABLE_FLAG = (1<<31)
 SEQUENCE_LOCKTIME_TYPE_FLAG = (1<<22) # this means use time (0 means height)
@@ -126,11 +127,11 @@ class BIP68Test(BitcoinTestFramework):
             addresses.append(self.nodes[0].getnewaddress())
         while len(self.nodes[0].listunspent()) < 200:
             import random
-            random.shuffle(addresses)
-            num_outputs = random.randint(1, max_outputs)
+            secrets.SystemRandom().shuffle(addresses)
+            num_outputs = secrets.SystemRandom().randint(1, max_outputs)
             outputs = {}
             for i in range(num_outputs):
-                outputs[addresses[i]] = random.randint(1, 20)*0.01
+                outputs[addresses[i]] = secrets.SystemRandom().randint(1, 20)*0.01
             self.nodes[0].sendmany("", outputs)
             self.nodes[0].generate(1)
 

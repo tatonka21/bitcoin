@@ -27,7 +27,6 @@ import socket
 import asyncore
 import time
 import sys
-import random
 from .util import hex_str_to_bytes, bytes_to_hex_str
 from io import BytesIO
 from codecs import encode
@@ -37,6 +36,7 @@ from threading import Thread
 import logging
 import copy
 from test_framework.siphash import siphash256
+import secrets
 
 BIP0031_VERSION = 60000
 MY_VERSION = 70014  # past bip-31 for ping/pong
@@ -927,7 +927,7 @@ class msg_version(object):
         self.nTime = int(time.time())
         self.addrTo = CAddress()
         self.addrFrom = CAddress()
-        self.nNonce = random.getrandbits(64)
+        self.nNonce = secrets.SystemRandom().getrandbits(64)
         self.strSubVer = MY_SUBVERSION
         self.nStartingHeight = -1
 
