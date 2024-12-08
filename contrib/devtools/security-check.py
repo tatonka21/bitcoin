@@ -9,6 +9,7 @@ from __future__ import division,print_function,unicode_literals
 import subprocess
 import sys
 import os
+from security import safe_command
 
 READELF_CMD = os.getenv('READELF', '/usr/bin/readelf')
 OBJDUMP_CMD = os.getenv('OBJDUMP', '/usr/bin/objdump')
@@ -17,7 +18,7 @@ def check_ELF_PIE(executable):
     '''
     Check for position independent executable (PIE), allowing for address space randomization.
     '''
-    p = subprocess.Popen([READELF_CMD, '-h', '-W', executable], stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+    p = safe_command.run(subprocess.Popen, [READELF_CMD, '-h', '-W', executable], stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
     (stdout, stderr) = p.communicate()
     if p.returncode:
         raise IOError('Error opening file')
@@ -31,7 +32,7 @@ def check_ELF_PIE(executable):
 
 def get_ELF_program_headers(executable):
     '''Return type and flags for ELF program headers'''
-    p = subprocess.Popen([READELF_CMD, '-l', '-W', executable], stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+    p = safe_command.run(subprocess.Popen, [READELF_CMD, '-l', '-W', executable], stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
     (stdout, stderr) = p.communicate()
     if p.returncode:
         raise IOError('Error opening file')
@@ -88,7 +89,7 @@ def check_ELF_RELRO(executable):
             have_gnu_relro = True
 
     have_bindnow = False
-    p = subprocess.Popen([READELF_CMD, '-d', '-W', executable], stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+    p = safe_command.run(subprocess.Popen, [READELF_CMD, '-d', '-W', executable], stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
     (stdout, stderr) = p.communicate()
     if p.returncode:
         raise IOError('Error opening file')
@@ -102,7 +103,7 @@ def check_ELF_Canary(executable):
     '''
     Check for use of stack canary
     '''
-    p = subprocess.Popen([READELF_CMD, '--dyn-syms', '-W', executable], stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+    p = safe_command.run(subprocess.Popen, [READELF_CMD, '--dyn-syms', '-W', executable], stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
     (stdout, stderr) = p.communicate()
     if p.returncode:
         raise IOError('Error opening file')
@@ -116,7 +117,7 @@ def get_PE_dll_characteristics(executable):
     '''
     Get PE DllCharacteristics bits
     '''
-    p = subprocess.Popen([OBJDUMP_CMD, '-x',  executable], stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+    p = safe_command.run(subprocess.Popen, [OBJDUMP_CMD, '-x',  executable], stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
     (stdout, stderr) = p.communicate()
     if p.returncode:
         raise IOError('Error opening file')

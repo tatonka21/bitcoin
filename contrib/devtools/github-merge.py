@@ -20,6 +20,8 @@ from sys import stdin,stdout,stderr
 import argparse
 import subprocess
 import json,codecs
+from security import safe_command
+
 try:
     from urllib.request import Request,urlopen
 except:
@@ -153,7 +155,7 @@ def main():
         print("ERROR: Cannot find branch %s on %s." % (branch,host_repo), file=stderr)
         exit(3)
     subprocess.check_call([GIT,'checkout','-q',base_branch])
-    subprocess.call([GIT,'branch','-q','-D',local_merge_branch], stderr=devnull)
+    safe_command.run(subprocess.call, [GIT,'branch','-q','-D',local_merge_branch], stderr=devnull)
     subprocess.check_call([GIT,'checkout','-q','-b',local_merge_branch])
 
     try:
@@ -183,7 +185,7 @@ def main():
             # Go up to the repository's root.
             toplevel = subprocess.check_output([GIT,'rev-parse','--show-toplevel']).strip()
             os.chdir(toplevel)
-            if subprocess.call(testcmd,shell=True):
+            if safe_command.run(subprocess.call, testcmd,shell=True):
                 print("ERROR: Running %s failed." % testcmd,file=stderr)
                 exit(5)
 
@@ -210,7 +212,7 @@ def main():
             print("Type 'exit' when done.",file=stderr)
             if os.path.isfile('/etc/debian_version'): # Show pull number on Debian default prompt
                 os.putenv('debian_chroot',pull)
-            subprocess.call([BASH,'-i'])
+            safe_command.run(subprocess.call, [BASH,'-i'])
             reply = ask_prompt("Type 'm' to accept the merge.")
             if reply.lower() == 'm':
                 print("Merge accepted.",file=stderr)
@@ -235,11 +237,11 @@ def main():
         subprocess.check_call([GIT,'reset','-q','--hard',local_merge_branch])
     finally:
         # Clean up temporary branches.
-        subprocess.call([GIT,'checkout','-q',branch])
-        subprocess.call([GIT,'branch','-q','-D',head_branch],stderr=devnull)
-        subprocess.call([GIT,'branch','-q','-D',base_branch],stderr=devnull)
-        subprocess.call([GIT,'branch','-q','-D',merge_branch],stderr=devnull)
-        subprocess.call([GIT,'branch','-q','-D',local_merge_branch],stderr=devnull)
+        safe_command.run(subprocess.call, [GIT,'checkout','-q',branch])
+        safe_command.run(subprocess.call, [GIT,'branch','-q','-D',head_branch],stderr=devnull)
+        safe_command.run(subprocess.call, [GIT,'branch','-q','-D',base_branch],stderr=devnull)
+        safe_command.run(subprocess.call, [GIT,'branch','-q','-D',merge_branch],stderr=devnull)
+        safe_command.run(subprocess.call, [GIT,'branch','-q','-D',local_merge_branch],stderr=devnull)
 
     # Push the result.
     reply = ask_prompt("Type 'push' to push the result to %s, branch %s." % (host_repo,branch))
