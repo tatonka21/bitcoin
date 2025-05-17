@@ -35,8 +35,9 @@ and confirm again balances are correct.
 
 from test_framework.test_framework import BitcoinTestFramework
 from test_framework.util import *
-from random import randint
 import logging
+import secrets
+
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO, stream=sys.stdout)
 
 class WalletBackupTest(BitcoinTestFramework):
@@ -59,8 +60,8 @@ class WalletBackupTest(BitcoinTestFramework):
         self.sync_all()
 
     def one_send(self, from_node, to_address):
-        if (randint(1,2) == 1):
-            amount = Decimal(randint(1,10)) / Decimal(10)
+        if (secrets.SystemRandom().randint(1,2) == 1):
+            amount = Decimal(secrets.SystemRandom().randint(1,10)) / Decimal(10)
             self.nodes[from_node].sendtoaddress(to_address, amount)
 
     def do_one_round(self):
