@@ -28,6 +28,7 @@ import sys
 import subprocess
 import tempfile
 import re
+from security import safe_command
 
 sys.path.append("qa/pull-tester/")
 from tests_config import *
@@ -252,7 +253,7 @@ class RPCTestHandler:
             port_seed = ["--portseed=%s" % len(self.test_list)]
             self.jobs.append((t,
                               time.time(),
-                              subprocess.Popen((RPC_TESTS_DIR + t).split() + self.flags + port_seed,
+                              safe_command.run(subprocess.Popen, (RPC_TESTS_DIR + t).split() + self.flags + port_seed,
                                                universal_newlines=True,
                                                stdout=subprocess.PIPE,
                                                stderr=subprocess.PIPE)))
